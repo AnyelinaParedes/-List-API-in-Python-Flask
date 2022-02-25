@@ -9,7 +9,15 @@ from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
 from models import db, User
-#from models import Person
+from models import db, Species
+from models import db, Vehicles
+from models import db, People
+from models import db, Starships
+from models import db, UserFavoritesSpecies
+from models import db, UserFavoritesVehicles
+from models import db, UserFavoritesPeople
+from models import db, UserFavoritesStarships
+
 
 app = Flask(__name__)
 app.url_map.strict_slashes = False
@@ -30,16 +38,25 @@ def handle_invalid_usage(error):
 def sitemap():
     return generate_sitemap(app)
 
-@app.route('/user', methods=['GET'])
-def handle_hello():
+#@app.route('/user', methods=['GET'])
+#def handle_hello():
 
-    response_body = {
-        "msg": "Hello, this is your GET /user response "
-    }
+@app.route('/users', methods=['POST'])
+def create_user():
+    if request.method == 'POST':
+        user_name = request.json.get('user_name')
+        email = request.json.get('email')   
 
-    return jsonify(response_body), 200
+        user= User()
+        user.user_name = user_name
+        user.email = email      
 
-# this only runs if `$ python src/main.py` is executed
+        db.session.add(user)
+        db.session.commit()     
+        
+        return jsonify(user.serialize()), 201
+
+
 if __name__ == '__main__':
     PORT = int(os.environ.get('PORT', 3000))
     app.run(host='0.0.0.0', port=PORT, debug=False)
